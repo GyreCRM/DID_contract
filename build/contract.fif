@@ -189,33 +189,26 @@ PROGRAM{
   }>
   recv_internal PROC:<{
     //  msg_value in_msg_full in_msg_body
-    x{455143384f70615a75616f55756578647a4253504b356b356f74347a343642766948726e635070655579707948684874} PUSHSLICE
-    s3 POP	//  manager_address in_msg_full in_msg_body
-    32 LDU	//  manager_address in_msg_full op in_msg_body
-    64 LDU	//  manager_address in_msg_full op _44 _43
-    NIP	//  manager_address in_msg_full op in_msg_body
-    s0 s2 XCHG	//  manager_address in_msg_body op in_msg_full
-    parse_sender_address INLINECALLDICT	//  manager_address in_msg_body op sender_address
-    s1 s3 XCHG	//  op in_msg_body manager_address sender_address
-    SDEQ	//  op in_msg_body _16
-    NOT	//  op in_msg_body _17
-    1001 THROWIF
+    2 1 BLKDROP2	//  in_msg_body
+    32 LDU	//  op in_msg_body
+    64 LDU	//  op _40 _39
+    NIP	//  op in_msg_body
     c4 PUSH	//  op in_msg_body data
     DUP	//  op in_msg_body data data
     CTOS	//  op in_msg_body data ds
-    SBITS	//  op in_msg_body data _24
-    0 EQINT	//  op in_msg_body data _26
+    SBITS	//  op in_msg_body data _20
+    0 EQINT	//  op in_msg_body data _22
     IF:<{	//  op in_msg_body data
       DROP	//  op in_msg_body
-      NEWDICT	//  op in_msg_body _27
-    }>ELSE<{	//  op in_msg_body _27
+      NEWDICT	//  op in_msg_body _23
+    }>ELSE<{	//  op in_msg_body _23
     }>	//  op in_msg_body dict
     s0 s2 XCHG	//  dict in_msg_body op
-    1 EQINT	//  dict in_msg_body _30
+    1 EQINT	//  dict in_msg_body _26
     IFJMP:<{	//  dict in_msg_body
       32 LDU	//  dict key in_msg_body
       s0 s2 XCHG
-      32 PUSHINT	//  in_msg_body key dict _36=32
+      32 PUSHINT	//  in_msg_body key dict _32=32
       DICTUSET	//  dict
       c4 POP
     }>	//  dict in_msg_body

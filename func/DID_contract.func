@@ -24,7 +24,7 @@ return sender_address;
     int query_id = in_msg_body~load_uint(64);
     slice sender_address = parse_sender_address(in_msg_full);
     
-    throw_if(1001, ~ equal_slices(manager_address, sender_address));  ;; check if certificate 
+    ;;throw_if(1001, ~ equal_slices(manager_address, sender_address));  ;; check if certificate 
     ;; is issued by the right authority
 
     cell data = get_data();
