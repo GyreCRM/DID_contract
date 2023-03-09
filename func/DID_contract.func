@@ -1,0 +1,52 @@
+cell udict_set(cell dict, int key_len, int index, slice value) asm(value index dict key_len) "DICTUSET";
+int equal_slices (slice a, slice b) asm "SDEQ";
+
+cell load_data() {
+	cell data = get_data();
+	slice ds = data.begin_parse();
+	if (ds.slice_bits() == 0) {
+		return new_dict();
+	} 
+    else { return data; }
+}
+
+(slice) parse_sender_address(cell in_msg_full) inline {
+var cs = in_msg_full.begin_parse();   ;; cell storage; cell into slice
+var flags = cs~load_uint(4);  ;; subtract(take away) flags
+
+slice sender_address = cs~load_msg_addr(); ;; get sender address
+return sender_address;
+}
+
+() recv_internal(int msg_value, cell in_msg_full, slice in_msg_body)  {
+    slice manager_address = "00";
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+    slice sender_address = parse_sender_address(in_msg_full);
+    
+    throw_if(1001, ~ equal_slices(manager_address, sender_address));  ;; check if certificate 
+    ;; is issued by the right authority
+
+    cell data = get_data();
+    slice ds = data.begin_parse();
+    cell dict = ds.slice_bits() == 0 ? new_dict() : data;  ;; conditional operator: 
+                   ;; <condition> ? <consequence> : <alternative>
+
+    if (op == 1){  ;; add value to the dictionary
+        int key = in_msg_body~load_uint(32);
+        dict~udict_set(32, key, in_msg_body);
+        set_data(dict);
+        return ();
+    } 
+    else { throw(3);}
+}
+
+ (int, slice) certificate(int student_id) method_id {
+	cell dict = load_data();
+    (slice certificate, int success) = dict.udict_get?(32, student_id);
+    throw_unless(98, success);
+	return (student_id, certificate);
+}
+
+
+
