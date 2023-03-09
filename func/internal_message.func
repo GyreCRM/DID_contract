@@ -1,0 +1,23 @@
+()  message () {
+
+    slice message_body = begin_cell()
+      .store_uint(1, 32)  ;; op
+	    .store_uint(12345, 64) ;; query id
+	    .store_uint(1, 32) ;; key (student_id)
+      ;; values to be stored
+      .store_slice("hash_or_URI")
+	  {-.store_slice("student_name") ;; course
+	    .store_slice("course_name");; student
+      .store_uint(timestamp,256);; timestamp(date) of issue-}
+	    .end_cell().begin_parse();
+
+    var msg = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(addr) ;; sender's address; will be rewritten anyway
+        .store_coins(1)  ;; amount of ton
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
+        ;;(includes 14 parameters)
+        .store_slice(message_body)
+        .end_cell();
+
+}
