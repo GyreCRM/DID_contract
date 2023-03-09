@@ -6,9 +6,6 @@
 	    .store_uint(1, 32) ;; key (student_id)
       ;; values to be stored
       .store_slice("hash_or_URI")
-	  {-.store_slice("student_name") ;; course
-	    .store_slice("course_name");; student
-      .store_uint(timestamp,256);; timestamp(date) of issue-}
 	    .end_cell().begin_parse();
 
     var msg = begin_cell()
