@@ -189,7 +189,7 @@ PROGRAM{
   }>
   recv_internal PROC:<{
     //  msg_value in_msg_full in_msg_body
-    x{3030} PUSHSLICE
+    x{455143384f70615a75616f55756578647a4253504b356b356f74347a343642766948726e635070655579707948684874} PUSHSLICE
     s3 POP	//  manager_address in_msg_full in_msg_body
     32 LDU	//  manager_address in_msg_full op in_msg_body
     64 LDU	//  manager_address in_msg_full op _44 _43
