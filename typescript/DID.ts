@@ -1,8 +1,8 @@
-import { Contract, ContractProvider, Sender, Address, Cell, contractAddress, beginCell } from "ton-core";
+import { Contract, ContractProvider, Sender, Address, Cell, Slice, contractAddress, beginCell } from "ton-core";
 
 export default class Counter implements Contract {
 
-  async sendCertificate(provider: ContractProvider, via: Sender, hash: string, student_id: number) {
+  async sendCertificate(provider: ContractProvider, via: Sender, hash: Slice, student_id: number) {
       const messageBody = beginCell()
           .store_uint(1, 32) // op
           .store_uint(12345, 64)  // query_id
