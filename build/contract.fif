@@ -7,6 +7,7 @@ PROGRAM{
   DECLPROC exp
   DECLPROC log2
   DECLPROC load_data
+  DECLPROC load_address
   DECLPROC parse_sender_address
   DECLPROC recv_internal
   106667 DECLMETHOD certificate
@@ -167,17 +168,28 @@ PROGRAM{
       INC	//  n
     }>	//  n
   }>
-  load_data PROC:<{
+  load_data PROCINLINE:<{
     // 
-    c4 PUSH	//  data
-    DUP	//  data data
-    CTOS	//  data ds
-    SBITS	//  data _4
-    0 EQINT	//  data _6
-    IFJMP:<{	//  data
-      DROP	// 
-      NEWDICT	//  _7
-    }>	//  data
+    c4 PUSH	//  ds
+    CTOS	//  data
+    LDMSGADDR	//  manager data
+    DUP	//  manager data data
+    SREFS	//  manager data _7
+    0 EQINT	//  manager data _9
+    IF:<{	//  manager data
+      DROP	//  manager
+      NEWDICT	//  manager _10
+    }>ELSE<{	//  manager data
+      LDREF	//  manager _17 _16
+      DROP	//  manager dict
+    }>
+  }>
+  load_address PROCINLINE:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  ds
+    LDMSGADDR	//  _6 _5
+    DROP	//  _3
   }>
   parse_sender_address PROCINLINE:<{
     //  in_msg_full
@@ -189,37 +201,60 @@ PROGRAM{
   }>
   recv_internal PROC:<{
     //  msg_value in_msg_full in_msg_body
-    2 1 BLKDROP2	//  in_msg_body
-    32 LDU	//  op in_msg_body
-    64 LDU	//  op _40 _39
-    NIP	//  op in_msg_body
-    c4 PUSH	//  op in_msg_body data
-    DUP	//  op in_msg_body data data
-    CTOS	//  op in_msg_body data ds
-    SBITS	//  op in_msg_body data _20
-    0 EQINT	//  op in_msg_body data _22
-    IF:<{	//  op in_msg_body data
-      DROP	//  op in_msg_body
-      NEWDICT	//  op in_msg_body _23
-    }>ELSE<{	//  op in_msg_body _23
-    }>	//  op in_msg_body dict
-    s0 s2 XCHG	//  dict in_msg_body op
-    1 EQINT	//  dict in_msg_body _26
-    IFJMP:<{	//  dict in_msg_body
-      32 LDU	//  dict key in_msg_body
-      s0 s2 XCHG
-      32 PUSHINT	//  in_msg_body key dict _32=32
-      DICTUSET	//  dict
+    1 2 BLKDROP2	//  in_msg_full in_msg_body
+    32 LDU	//  in_msg_full op in_msg_body
+    64 LDU	//  in_msg_full op _53 _52
+    NIP	//  in_msg_full op in_msg_body
+    s0 s2 XCHG	//  in_msg_body op in_msg_full
+    parse_sender_address INLINECALLDICT	//  in_msg_body op sender_address
+    load_data INLINECALLDICT	//  in_msg_body op sender_address manager_address dict
+    s3 PUSH	//  in_msg_body op sender_address manager_address dict op
+    1 EQINT	//  in_msg_body op sender_address manager_address dict _17
+    IFJMP:<{	//  in_msg_body op sender_address manager_address dict
+      2 2 BLKDROP2	//  in_msg_body manager_address dict
+      s0 s2 XCHG	//  dict manager_address in_msg_body
+      32 LDU	//  dict manager_address key in_msg_body
+      DUP	//  dict manager_address key in_msg_body in_msg_body
+      SBITS	//  dict manager_address key in_msg_body string_size
+      LDSLICEX	//  dict manager_address key _59 _58
+      DROP	//  dict manager_address key hash
+      s0 s1 s3 XCHG3
+      32 PUSHINT	//  manager_address hash key dict _28=32
+      DICTUSET	//  manager_address dict
+      NEWC
+      ROT	//  dict _30 manager_address
+      STSLICER	//  dict _31
+      STREF	//  _32
+      ENDC	//  _33
       c4 POP
-    }>	//  dict in_msg_body
-    2DROP	// 
-    3 THROW
+    }>	//  in_msg_body op sender_address manager_address dict
+    s0 s3 XCHG	//  in_msg_body dict sender_address manager_address op
+    2 EQINT	//  in_msg_body dict sender_address manager_address _36
+    IF:<{	//  in_msg_body dict sender_address manager_address
+      SWAP	//  in_msg_body dict manager_address sender_address
+      SDEQ	//  in_msg_body dict _38
+      NOT	//  in_msg_body dict _39
+      1002 THROWIF
+      NEWC	//  in_msg_body dict _41
+      s0 s2 XCHG	//  _41 dict in_msg_body
+      LDMSGADDR	//  _41 dict _61 _60
+      DROP	//  _41 dict _42
+      s1 s2 XCHG	//  dict _41 _42
+      STSLICER	//  dict _44
+      STREF	//  _45
+      ENDC	//  _46
+      c4 POP
+    }>ELSE<{	//  in_msg_body dict sender_address manager_address
+      4 BLKDROP	// 
+      3 THROW
+    }>
   }>
   certificate PROC:<{
     //  student_id
-    load_data CALLDICT	//  student_id dict
+    load_data INLINECALLDICT	//  student_id _10 _11
+    NIP	//  student_id dict
     s1 s(-1) PUXC
-    32 PUSHINT	//  student_id student_id dict _5=32
+    32 PUSHINT	//  student_id student_id dict _6=32
     DICTUGET
     NULLSWAPIFNOT	//  student_id certificate success
     98 THROWIFNOT
