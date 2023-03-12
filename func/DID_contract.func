@@ -2,17 +2,17 @@ cell udict_set(cell dict, int key_len, int index, slice value) asm(value index d
 int equal_slices (slice a, slice b) asm "SDEQ";
 
 (slice, cell) load_data() inline {
-	cell data = get_data();
-	slice ds = data.begin_parse();
-    slice manager = ds~load_msg_addr();
-    slice dict = data~load_ref().begin_parse();
-	if (dict.slice_bits() == 0) {
+	cell ds = get_data();
+	slice data = ds.begin_parse();
+    slice manager = data~load_msg_addr();
+    if (data.slice_refs() == 0) {
 		return (manager, new_dict());
 	} 
-    else { return (manager, dict); }
+    else { cell dict = data~load_ref();
+        return (manager, dict); }
 }
 
-(slice, slice) load_address () inline {
+(slice) load_address () inline {
   var ds = get_data().begin_parse();
   return ds~load_msg_addr();
 }
@@ -31,7 +31,7 @@ return sender_address;
     int query_id = in_msg_body~load_uint(64);
     slice sender_address = parse_sender_address(in_msg_full);
     
-    (slice manager_address, cell data) = load_data();
+    (slice manager_address, cell dict) = load_data();
     ;;cell dict = ds.slice_bits() == 0 ? new_dict() : data;  ;; conditional operator: 
                    ;; <condition> ? <consequence> : <alternative>
 
@@ -40,7 +40,9 @@ return sender_address;
 
     if (op == 1){  ;; add value to the dictionary
         int key = in_msg_body~load_uint(32);
-        dict~udict_set(32, key, in_msg_body);
+        int string_size = in_msg_body.slice_bits();
+        slice hash = in_msg_body~load_bits(string_size);
+        dict~udict_set(32, key, hash);
         set_data(begin_cell()  ;; saving the data
                         .store_slice(manager_address)  
                         .store_ref(dict)
@@ -56,12 +58,12 @@ return sender_address;
                         .end_cell()
             );
         }
-        else {throw(3);}
+        else { throw(3);}
     }
 }
 
  (int, slice) certificate(int student_id) method_id {
-	(slice manager_address, cell dict) = load_data();
+	(slice manager_address, cell dict) = load_data(); ;; manager address not used
     (slice certificate, int success) = dict.udict_get?(32, student_id);
     throw_unless(98, success);
 	return (student_id, certificate);
