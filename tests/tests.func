@@ -1,0 +1,32 @@
+() set_default_initial_data() impure {
+  set_data(begin_cell()
+            .store_slice("A")
+            .store_slice("A")
+            .end_cell());
+}
+
+int __test_example() {
+    set_default_initial_data();
+
+    cell message_body = begin_cell()
+                    .store_uint(1, 32)  ;; op
+	                .store_uint(12345, 64) ;; query id
+                    .store_uint(3, 32) ;; key 
+                    .store_slice("Vlad")
+                    .end_cell();
+
+    var msg = begin_cell()
+            .store_uint(0x10, 6)
+            .store_slice("Han")  ;; sender's address; will be rewritten anyway
+            .store_grams(0)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_slice(message_body.begin_parse())
+          .end_cell();
+
+    var (int gas_used1, _) = invoke_method(recv_internal, [msg, message_body.begin_parse()]);  ;;
+    var (int gas_used2, stack) = invoke_method(address, []);  ;; calling get method
+
+    [int total,cell addr] = stack; 
+    throw_unless(101, total = 10);   
+    return gas_used1 + gas_used2;  
+}
