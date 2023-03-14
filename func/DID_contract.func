@@ -40,10 +40,12 @@ return sender_address;
 
     if (op == 1){  ;; add value to the dictionary
         int key = in_msg_body~load_uint(32);
-        throw_unless(103,in_msg_body.slice_data_empty?());
+        throw_if(103,in_msg_body.slice_data_empty?());          
+        throw_if(105,in_msg_body.slice_refs_empty?());             ;; check refs existance
         cell hash_ref_cell = in_msg_body~load_ref();
         slice hash_slice = hash_ref_cell.begin_parse();
-        int hash_slice_size = hash_slice.slice_bits();
+        int hash_slice_size = hash_slice.slice_bits(); 
+        throw_if(106, hash_slice_size == 0);                ;; check size of ref cell
         slice hash = hash_slice~load_bits(hash_slice_size);
         dict~udict_set(32, key, hash);
         set_data(begin_cell()  ;; saving the data
@@ -54,7 +56,7 @@ return sender_address;
     } 
     else {
         if (op == 2 ){  ;; change manager address 
-        throw_if(1002, ~ equal_slices(manager_address, sender_address));  ;; only manager can change address
+        throw_if(102, ~ equal_slices(manager_address, sender_address));  ;; only manager can change address
         set_data(begin_cell()
                         .store_slice(in_msg_body~load_msg_addr())  ;; saving new manager address
                         .store_ref(dict)
@@ -65,11 +67,12 @@ return sender_address;
     }
 }
 
- (int, slice) certificate(int student_id) method_id {
+ (int, int, slice) certificate(int student_id) method_id {
 	(slice manager_address, cell dict) = load_data(); ;; manager address not used
     (slice certificate, int success) = dict.udict_get?(32, student_id);
-    throw_unless(98, success);
-	return (student_id, certificate);
+    throw_unless(104, success);
+    int slice_bits = certificate.slice_bits();
+	return (student_id, slice_bits, certificate);
 }
 
 
@@ -78,7 +81,8 @@ return sender_address;
 
 ;; EROR CODES:
 
-
+;; 102 not a manager tries to change manager address 
 ;; 103 - in_msg_body slice has unread bits
-
-
+;; 104 - no data found in dict
+;; 105 - no reference cell in msg
+;; 106 - reference cell is empty 
