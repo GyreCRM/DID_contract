@@ -4,18 +4,22 @@
 // you will see that integer and cell slice are in stack
 
 // print seqno (it is just int in stack)
-."🤗 Seqno as int from " ^green ."GET" ^reset ." method is: "
+."Key is : "
 
-swap // get seqno as int on top of stack
+ // get seqno as int on top of stack
+swap
+rot
 (dump) // dump to string
 type // print it to output
 cr // print endline
 
-<s dup 32 u@ // get seqno from cell
-swap ref@ // get ref on first cell
-<s 64 u@ // get message from second cell
-swap // get seqno from cell to top
+// get seqno from cell
+// get ref on first cell
 
-."🤗 Seqno as int from cell from " ^green ."GET" ^reset ." method is: " (dump) type cr
+."Slice length: " (dump) type cr
+.s
+59 $@ // get message from second cell
+ // get seqno from cell to top
 
-."🥳 Message from ref cell: " (dump) type cr
+." Seqno as int from cell from " ^green ."GET" ^reset ." method is: " (dump) type cr
+
