@@ -1,12 +1,15 @@
 ()  message () {
 
+    cell hash_ref_cell = begin_cell()
+	                      .store_slice("VLad") 
+                        .end_cell();
+
     slice message_body = begin_cell()
       .store_uint(1, 32)  ;; op
 	    .store_uint(12345, 64) ;; query id
       ;; values to be stored
 	    .store_uint(1, 32) ;; key (student_id)
-      
-      .store_slice("hash_or_URI")
+      .store_ref(hash_ref_cell)
 	    .end_cell().begin_parse();
 
     var msg = begin_cell()

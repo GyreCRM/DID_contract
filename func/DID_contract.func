@@ -40,8 +40,11 @@ return sender_address;
 
     if (op == 1){  ;; add value to the dictionary
         int key = in_msg_body~load_uint(32);
-        int string_size = in_msg_body.slice_bits();
-        slice hash = in_msg_body~load_bits(string_size);
+        throw_unless(103,in_msg_body.slice_data_empty?());
+        cell hash_ref_cell = in_msg_body~load_ref();
+        slice hash_slice = hash_ref_cell.begin_parse();
+        int hash_slice_size = hash_slice.slice_bits();
+        slice hash = hash_slice~load_bits(hash_slice_size);
         dict~udict_set(32, key, hash);
         set_data(begin_cell()  ;; saving the data
                         .store_slice(manager_address)  
@@ -69,5 +72,13 @@ return sender_address;
 	return (student_id, certificate);
 }
 
+
+
+
+
+;; EROR CODES:
+
+
+;; 103 - in_msg_body slice has unread bits
 
 
