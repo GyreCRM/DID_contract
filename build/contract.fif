@@ -203,7 +203,7 @@ PROGRAM{
     //  msg_value in_msg_full in_msg_body
     1 2 BLKDROP2	//  in_msg_full in_msg_body
     32 LDU	//  in_msg_full op in_msg_body
-    64 LDU	//  in_msg_full op _53 _52
+    64 LDU	//  in_msg_full op _61 _60
     NIP	//  in_msg_full op in_msg_body
     s0 s2 XCHG	//  in_msg_body op in_msg_full
     parse_sender_address INLINECALLDICT	//  in_msg_body op sender_address
@@ -215,34 +215,40 @@ PROGRAM{
       s0 s2 XCHG	//  dict manager_address in_msg_body
       32 LDU	//  dict manager_address key in_msg_body
       DUP	//  dict manager_address key in_msg_body in_msg_body
-      SBITS	//  dict manager_address key in_msg_body string_size
-      LDSLICEX	//  dict manager_address key _59 _58
+      SDEMPTY	//  dict manager_address key in_msg_body _23
+      103 THROWIFNOT
+      LDREF	//  dict manager_address key _67 _66
+      DROP	//  dict manager_address key hash_ref_cell
+      CTOS	//  dict manager_address key hash_slice
+      DUP	//  dict manager_address key hash_slice hash_slice
+      SBITS	//  dict manager_address key hash_slice hash_slice_size
+      LDSLICEX	//  dict manager_address key _69 _68
       DROP	//  dict manager_address key hash
       s0 s1 s3 XCHG3
-      32 PUSHINT	//  manager_address hash key dict _28=32
+      32 PUSHINT	//  manager_address hash key dict _36=32
       DICTUSET	//  manager_address dict
       NEWC
-      ROT	//  dict _30 manager_address
-      STSLICER	//  dict _31
-      STREF	//  _32
-      ENDC	//  _33
+      ROT	//  dict _38 manager_address
+      STSLICER	//  dict _39
+      STREF	//  _40
+      ENDC	//  _41
       c4 POP
     }>	//  in_msg_body op sender_address manager_address dict
     s0 s3 XCHG	//  in_msg_body dict sender_address manager_address op
-    2 EQINT	//  in_msg_body dict sender_address manager_address _36
+    2 EQINT	//  in_msg_body dict sender_address manager_address _44
     IF:<{	//  in_msg_body dict sender_address manager_address
       SWAP	//  in_msg_body dict manager_address sender_address
-      SDEQ	//  in_msg_body dict _38
-      NOT	//  in_msg_body dict _39
+      SDEQ	//  in_msg_body dict _46
+      NOT	//  in_msg_body dict _47
       1002 THROWIF
-      NEWC	//  in_msg_body dict _41
-      s0 s2 XCHG	//  _41 dict in_msg_body
-      LDMSGADDR	//  _41 dict _61 _60
-      DROP	//  _41 dict _42
-      s1 s2 XCHG	//  dict _41 _42
-      STSLICER	//  dict _44
-      STREF	//  _45
-      ENDC	//  _46
+      NEWC	//  in_msg_body dict _49
+      s0 s2 XCHG	//  _49 dict in_msg_body
+      LDMSGADDR	//  _49 dict _71 _70
+      DROP	//  _49 dict _50
+      s1 s2 XCHG	//  dict _49 _50
+      STSLICER	//  dict _52
+      STREF	//  _53
+      ENDC	//  _54
       c4 POP
     }>ELSE<{	//  in_msg_body dict sender_address manager_address
       4 BLKDROP	// 
