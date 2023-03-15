@@ -1,9 +1,12 @@
+int equal_slices (slice a, slice b) asm "SDEQ";
+
 () set_default_initial_data() impure {
   cell dict = new_dict();
   slice hash = "kQBtO0gynpAGdXQn0lyYL2QhhGQQ_4PHe2kIM50eSuP9NX7z";
+  slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
   dict~udict_set(32, 1, hash);
   set_data(begin_cell()
-            .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu")  ;; store owners address 
+            .store_slice(manager_address)  ;; store managers address 
             .store_ref(dict) ;; store dict as ref cell
             .end_cell());
 }
@@ -12,12 +15,12 @@ int __test_adding_value() {
     set_default_initial_data();
 
     cell hash_ref_cell = begin_cell()
-	                      .store_slice("VLad") 
+	                    .store_slice("VLad") 
                         .end_cell();
 
     slice message_body = begin_cell()
                     .store_uint(1, 32)  ;; op
-	                  .store_uint(12345, 64) ;; query id
+	                .store_uint(12345, 64) ;; query id
                     .store_uint(3, 32) ;; key 
                     .store_ref(hash_ref_cell)
                     .end_cell().begin_parse();
@@ -43,4 +46,53 @@ slice __test_get_certificate() {
     [int key ,int bits , slice hash] = stack; 
     throw_unless(101, bits == 384); 
     return hash;
+}
+
+int __test_change_manager() {
+    set_default_initial_data();
+
+    slice message_body = begin_cell()
+                    .store_uint(2, 32)  ;; op
+	                .store_uint(12345, 64) ;; query id
+                    .store_slice("kQBL10y2kZY7KJSeShi0D_UOcNbtirrAJBMQi9R1_huKox2O")
+                    .end_cell().begin_parse();
+
+    var msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a) ;; sender's address
+            .store_coins(1)  ;; amount of ton
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
+            ;;(includes 14 parameters)
+            .store_slice(message_body)
+            .end_cell();
+
+    var (int gas_used1, _) = invoke_method(recv_internal, [1, msg, message_body]);  ;;
+      return gas_used1; 
+
+}
+
+int __test_parse_sender_addr() {
+    set_default_initial_data();
+
+    slice message_body = begin_cell()   
+                    .store_uint(2, 32)  ;; op
+	                .store_uint(12345, 64) ;; query id
+                    .store_slice("00")
+                    .end_cell().begin_parse();
+
+    var msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a) ;; sender's address; will be rewritten anyway
+            .store_coins(1)  ;; amount of ton
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
+            ;;(includes 14 parameters)
+            .store_slice(message_body)
+            .end_cell();
+
+    var (int gas_used2, stack) = invoke_method(load_data, []);
+    [slice manager_address, cell dict] = stack;
+    var (int gas_used1, slice sender_address) = invoke_method(parse_sender_address, [msg]);
+    ;;var (int gas_used3, int result) = invoke_method(equal_slices, [sender_address, manager_address]);
+
+    return gas_used2;
 }
