@@ -2,3 +2,5 @@ contract:
   data: fift/data.fif
   func:
     - func/DID_contract.func
+  tests:
+    - tests/tests.func
