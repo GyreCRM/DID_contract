@@ -18,7 +18,7 @@ cr // print endline
 
 ."Slice length: " (dump) type cr
 .s
-59 $@ // get message from second cell
+48 $@ // get message from second cell
  // get seqno from cell to top
 
 ." Seqno as int from cell from " ^green ."GET" ^reset ." method is: " (dump) type cr
