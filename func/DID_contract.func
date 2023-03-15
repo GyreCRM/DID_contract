@@ -12,11 +12,6 @@ int equal_slices (slice a, slice b) asm "SDEQ";
         return (manager, dict); }
 }
 
-(slice) load_address () inline {
-  var ds = get_data().begin_parse();
-  return ds~load_msg_addr();
-}
-
 (slice) parse_sender_address(cell in_msg_full) inline {
 var cs = in_msg_full.begin_parse();   ;; cell storage; cell into slice
 var flags = cs~load_uint(4);  ;; subtract(take away) flags
@@ -26,26 +21,22 @@ return sender_address;
 }
 
 () recv_internal(int msg_value, cell in_msg_full, slice in_msg_body)  {
-    ;;slice manager_address = "EQC8OpaZuaoUuexdzBSPK5k5ot4z46BviHrncPpeUypyHhHt";
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
     slice sender_address = parse_sender_address(in_msg_full);
     
     (slice manager_address, cell dict) = load_data();
-    ;;cell dict = ds.slice_bits() == 0 ? new_dict() : data;  ;; conditional operator: 
-                   ;; <condition> ? <consequence> : <alternative>
-
     ;;throw_unless(1001,  equal_slices(manager_address, sender_address));  ;; check if certificate 
     ;; is issued by the right authority
 
     if (op == 1){  ;; add value to the dictionary
         int key = in_msg_body~load_uint(32);
         throw_unless(103,in_msg_body.slice_data_empty?());          ;; check that slice is empty
-        throw_if(105,in_msg_body.slice_refs_empty?());             ;; check refs existance
+        throw_if(105,in_msg_body.slice_refs_empty?());              ;; check refs existance
         cell hash_ref_cell = in_msg_body~load_ref();
         slice hash_slice = hash_ref_cell.begin_parse();
         int hash_slice_size = hash_slice.slice_bits(); 
-        throw_if(106, hash_slice_size == 0);                ;; check size of ref cell
+        throw_if(106, hash_slice_size == 0);                        ;; check size of ref cell
         slice hash = hash_slice~load_bits(hash_slice_size);
         dict~udict_set(32, key, hash);
         set_data(begin_cell()  ;; saving the data
@@ -56,7 +47,7 @@ return sender_address;
     } 
     else {
         if (op == 2 ){  ;; change manager address 
-        throw_if(102, ~ equal_slices(manager_address, sender_address));  ;; only manager can change address
+        throw_unless(102, equal_slices(manager_address, sender_address));  ;; only manager can change address
         set_data(begin_cell()
                         .store_slice(in_msg_body~load_msg_addr())  ;; saving new manager address
                         .store_ref(dict)
@@ -75,13 +66,16 @@ return sender_address;
 	return (student_id, slice_bits, certificate);
 }
 
-
+slice manager() method_id {
+    (slice manager_address, cell dict) = load_data();
+    return manager_address;
+}
 
 
 
 ;; EROR CODES:
 
-;; 102 not a manager tries to change manager address 
+;; 102 - not a manager tries to change manager address 
 ;; 103 - in_msg_body slice has unread bits
 ;; 104 - no data found in dict
 ;; 105 - no reference cell in msg
