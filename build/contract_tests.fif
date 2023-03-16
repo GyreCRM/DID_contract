@@ -71,6 +71,10 @@ PROGRAM{
   DECLPROC __test_get_certificate
   DECLPROC __test_change_manager
   DECLPROC __test_parse_sender_addr
+  DECLPROC __test_get_manager
+  DECLPROC __test_load_data
+  DECLPROC __test_equal_slices_contract
+  DECLPROC __test_equal_slices_here
   power PROCREF:<{
     //  x exponent
     OVER	//  x exponent x
@@ -2222,40 +2226,88 @@ PROGRAM{
   __test_parse_sender_addr PROC:<{
     // 
     set_default_initial_data CALLDICT
-    12345 PUSHINT	//  _2=12345
-    2 PUSHINT	//  _2=12345 _3=2
-    NEWC	//  _2=12345 _3=2 _4
-    32 STU	//  _2=12345 _6
-    64 STU	//  _8
-    x{3030} PUSHSLICE	//  _8 _9
-    STSLICER	//  _10
-    ENDC	//  _11
-    CTOS	//  message_body
-    0 PUSHINT	//  message_body _14=0
-    24 PUSHINT	//  message_body _14=0 _15=24
-    NEWC	//  message_body _14=0 _15=24 _16
-    6 STU	//  message_body _14=0 _18
-    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  message_body _14=0 _18 _19
-    STSLICER	//  message_body _14=0 _20
-    1 PUSHINT	//  message_body _14=0 _20 _21=1
-    STVARUINT16	//  message_body _14=0 _22
-    107 STU	//  message_body _36
-    SWAP	//  _36 message_body
-    STSLICER	//  _37
-    ENDC	//  msg
-    CONT:<{
-      load_data CALLDICT
-    }>	//  msg _41
-    0 TUPLE	//  msg _41 _42
-    invoke_method CALLDICT	//  msg _52 _53
-    DROP	//  msg gas_used2
+    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  manager_address
+    12345 PUSHINT	//  manager_address _4=12345
+    2 PUSHINT	//  manager_address _4=12345 _5=2
+    NEWC	//  manager_address _4=12345 _5=2 _6
+    32 STU	//  manager_address _4=12345 _8
+    64 STU	//  manager_address _10
+    x{3030} PUSHSLICE	//  manager_address _10 _11
+    STSLICER	//  manager_address _12
+    ENDC	//  manager_address _13
+    CTOS	//  manager_address message_body
+    0 PUSHINT	//  manager_address message_body _16=0
+    24 PUSHINT	//  manager_address message_body _16=0 _17=24
+    NEWC	//  manager_address message_body _16=0 _17=24 _18
+    6 STU	//  manager_address message_body _16=0 _20
+    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  manager_address message_body _16=0 _20 _21
+    STSLICER	//  manager_address message_body _16=0 _22
+    1 PUSHINT	//  manager_address message_body _16=0 _22 _23=1
+    STVARUINT16	//  manager_address message_body _16=0 _24
+    107 STU	//  manager_address message_body _38
+    SWAP	//  manager_address _38 message_body
+    STSLICER	//  manager_address _39
+    ENDC	//  manager_address msg
     CONT:<{
       parse_sender_address CALLDICT
-    }>	//  msg gas_used2 _49
-    s0 s2 XCHG	//  _49 gas_used2 msg
-    SINGLE	//  _49 gas_used2 _50
-    s1 s2 XCHG	//  gas_used2 _49 _50
-    invoke_method CALLDICT	//  gas_used2 _56 _57
-    2DROP	//  gas_used2
+    }>	//  manager_address msg _43
+    SWAP	//  manager_address _43 msg
+    SINGLE	//  manager_address _43 _44
+    invoke_method CALLDICT	//  manager_address _48 _49
+    NIP	//  manager_address sender_address
+    SWAP	//  sender_address manager_address
+    SDEQ	//  result
+  }>
+  __test_get_manager PROC:<{
+    // 
+    set_default_initial_data CALLDICT
+    CONT:<{
+      manager CALLDICT
+    }>	//  _5
+    0 TUPLE	//  _5 _6
+    invoke_method CALLDICT	//  _8 _9
+    DROP	//  gas_used
+  }>
+  __test_load_data PROC:<{
+    // 
+    set_default_initial_data CALLDICT
+    CONT:<{
+      load_data CALLDICT
+    }>	//  _3
+    0 TUPLE	//  _3 _4
+    invoke_method CALLDICT	//  gas_used stack
+    UNPAIR	//  gas_used _15 _16
+    NIP	//  gas_used dict
+    CTOS	//  gas_used _10
+    SDEMPTY	//  gas_used _11
+    106 THROWIF
+  }>
+  __test_equal_slices_contract PROC:<{
+    // 
+    set_default_initial_data CALLDICT
+    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  sender_address
+    CONT:<{
+      load_data CALLDICT
+    }>	//  sender_address _5
+    0 TUPLE	//  sender_address _5 _6
+    invoke_method CALLDICT	//  sender_address _18 _19
+    NIP	//  sender_address stack
+    UNPAIR	//  sender_address _20 _21
+    DROP	//  sender_address manager_address
+    CONT:<{
+      SDEQ
+    }>	//  sender_address manager_address _13
+    -ROT	//  _13 sender_address manager_address
+    PAIR	//  _13 _14
+    invoke_method CALLDICT	//  _22 _23
+    NIP	//  result
+    DUP	//  result result
+    102 THROWIF
+  }>
+  __test_equal_slices_here PROC:<{
+    // 
+    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  a
+    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  a b
+    SDEQ	//  res
   }>
 }END>c

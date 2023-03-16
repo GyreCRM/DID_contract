@@ -30,7 +30,7 @@ return sender_address;
     ;; is issued by the right authority
 
     if (op == 1){  ;; add value to the dictionary
-        int key = in_msg_body~load_uint(32);
+        int key = in_msg_body~load_uint(32);                        ;; load key
         throw_unless(103,in_msg_body.slice_data_empty?());          ;; check that slice is empty
         throw_if(105,in_msg_body.slice_refs_empty?());              ;; check refs existance
         cell hash_ref_cell = in_msg_body~load_ref();
