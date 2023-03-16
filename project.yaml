@@ -3,4 +3,5 @@ contract:
   func:
     - func/DID_contract.func
   tests:
-    - tests/tests.func
+    - tests/main_tests.func
+    - tests/supplementary_tests.func
