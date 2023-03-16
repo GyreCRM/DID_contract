@@ -1,0 +1,75 @@
+() set_default_initial_data() impure {
+  cell dict = new_dict();
+  slice hash = "kQBtO0gynpAGdXQn0lyYL2QhhGQQ_4PHe2kIM50eSuP9NX7z";
+  slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
+  dict~udict_set(32, 1, hash);
+  set_data(begin_cell()
+            .store_slice(manager_address)  ;; store managers address 
+            .store_ref(dict) ;; store dict as ref cell
+            .end_cell());
+}
+
+(slice,slice) __test_parse_sender_addr() {
+    set_default_initial_data();
+    slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
+
+    slice message_body = begin_cell()   
+                    .store_uint(2, 32)  ;; op
+	                .store_uint(12345, 64) ;; query id
+                    .store_slice("00")
+                    .end_cell().begin_parse();
+
+    var msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a) ;; sender's address
+            .store_coins(1)  ;; amount of ton
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
+            ;;(includes 14 parameters)
+            .store_slice(message_body)
+            .end_cell();
+
+    var (int gas_used, stack) = invoke_method(parse_sender_address, [msg]);
+    [slice sender_address] = stack
+    ;;int result = equal_slices(sender_address, manager_address);
+    return (sender_address,manager_address);
+}
+
+int __test_get_manager(){
+    set_default_initial_data();
+    slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
+
+    var (int gas_used, stack) = invoke_method(manager, []);
+    [slice manager_address] =stack;
+    return gas_used;
+}
+
+int __test_load_data() {
+    set_default_initial_data();
+
+    var (int gas_used, stack) = invoke_method(load_data, []);
+    [slice manager_address, cell dict] = stack;
+
+    throw_if(106, dict.begin_parse().slice_data_empty?());
+    return gas_used;
+}
+
+int __test_equal_slices_contract() {
+    set_default_initial_data();
+    slice sender_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
+    
+    var (_ , stack) = invoke_method(load_data, []);
+    [slice manager_address, cell dict] = stack;
+
+    var (int gas_used, stack) = invoke_method(equal_slices, [sender_address, manager_address]);
+    [int result] = stack;
+    throw_unless(102, result);
+    return result;
+}
+
+int __test_equal_slices_here() {
+    slice a = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
+    slice b = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
+
+    int res = equal_slices(a,b);
+    return res;
+}
