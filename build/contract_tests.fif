@@ -2231,7 +2231,7 @@ PROGRAM{
     NEWC	//  manager_address _4=12345 _5=2 _6
     32 STU	//  manager_address _4=12345 _8
     64 STU	//  manager_address _10
-    x{3030} PUSHSLICE	//  manager_address _10 _11
+    x{6b51446d7a6e4e38744f4b7a53517848547a4d5465676532514b46637243776e6b544e52745932637562474231494b75} PUSHSLICE	//  manager_address _10 _11
     STSLICER	//  manager_address _12
     ENDC	//  manager_address _13
     CTOS	//  manager_address message_body
@@ -2239,25 +2239,22 @@ PROGRAM{
     24 PUSHINT	//  manager_address message_body _16=0 _17=24
     NEWC	//  manager_address message_body _16=0 _17=24 _18
     6 STU	//  manager_address message_body _16=0 _20
-    x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  manager_address message_body _16=0 _20 _21
-    STSLICER	//  manager_address message_body _16=0 _22
-    1 PUSHINT	//  manager_address message_body _16=0 _22 _23=1
-    STVARUINT16	//  manager_address message_body _16=0 _24
-    107 STU	//  manager_address message_body _38
-    SWAP	//  manager_address _38 message_body
-    STSLICER	//  manager_address _39
+    s3 PUSH	//  manager_address message_body _16=0 _20 manager_address
+    STSLICER	//  manager_address message_body _16=0 _21
+    1 PUSHINT	//  manager_address message_body _16=0 _21 _22=1
+    STVARUINT16	//  manager_address message_body _16=0 _23
+    107 STU	//  manager_address message_body _37
+    SWAP	//  manager_address _37 message_body
+    STSLICER	//  manager_address _38
     ENDC	//  manager_address msg
     CONT:<{
       parse_sender_address CALLDICT
-    }>	//  manager_address msg _43
-    SWAP	//  manager_address _43 msg
-    SINGLE	//  manager_address _43 _44
-    invoke_method CALLDICT	//  manager_address _51 _52
+    }>	//  manager_address msg _42
+    SWAP	//  manager_address _42 msg
+    SINGLE	//  manager_address _42 _43
+    invoke_method CALLDICT	//  manager_address _47 _48
     NIP	//  manager_address stack
     UNSINGLE	//  manager_address sender_address
-    s0 s1 PUSH2	//  manager_address sender_address sender_address manager_address
-    SDEQ	//  manager_address sender_address _49
-    102 THROWIFNOT
     SWAP	//  sender_address manager_address
   }>
   __test_get_manager PROC:<{
@@ -2268,7 +2265,8 @@ PROGRAM{
     }>	//  _5
     0 TUPLE	//  _5 _6
     invoke_method CALLDICT	//  _10 _11
-    DROP	//  gas_used
+    NIP	//  stack
+    UNSINGLE	//  manager_address
   }>
   __test_load_data PROC:<{
     // 

@@ -14,8 +14,8 @@
 
     var msg = begin_cell()
         .store_uint(0x18, 6)
-        .store_slice(addr) ;; sender's address; will be rewritten anyway
-        .store_coins(1)  ;; amount of ton
+        .store_slice(addr) ;; sender's address; 
+        .store_coins(1)  ;; amount of nanoton
         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
         ;;(includes 14 parameters)
         .store_slice(message_body)

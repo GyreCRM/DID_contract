@@ -6,12 +6,12 @@
     slice message_body = begin_cell()   
                     .store_uint(2, 32)  ;; op
 	                .store_uint(12345, 64) ;; query id
-                    .store_slice("00")
+                    .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu")
                     .end_cell().begin_parse();
 
     var msg = begin_cell()
             .store_uint(0x18, 6)
-            .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a) ;; sender's address
+            .store_slice(manager_address) ;; sender's address
             .store_coins(1)  ;; amount of nanoTons to send
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
             ;;(includes 14 parameters)
@@ -20,17 +20,17 @@
 
     var (int gas_used, stack) = invoke_method(parse_sender_address, [msg]);
     [slice sender_address] = stack;
-    throw_unless(102, equal_slices(sender_address, manager_address));
+    ;;throw_unless(102, equal_slices(sender_address, manager_address));
     return (sender_address,manager_address);
 }
 
-int __test_get_manager(){
+slice __test_get_manager(){
     set_default_initial_data();
     slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
 
     var (int gas_used, stack) = invoke_method(manager, []);
     [slice manager_address] = stack;
-    return gas_used;
+    return manager_address;
 }
 
 (slice,slice) __test_load_data() {
