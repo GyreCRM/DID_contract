@@ -2281,18 +2281,14 @@ PROGRAM{
       load_data CALLDICT
     }>	//  addr _5
     0 TUPLE	//  addr _5 _6
-    invoke_method CALLDICT	//  addr _22 _23
+    invoke_method CALLDICT	//  addr _18 _19
     NIP	//  addr stack
     UNPAIR	//  addr manager_address dict
-    DUP	//  addr manager_address dict dict
-    CTOS	//  addr manager_address dict _12
-    SDEMPTY	//  addr manager_address dict _13
+    CTOS	//  addr manager_address _12
+    SDEMPTY	//  addr manager_address _13
     107 THROWIF
-    CTOS	//  addr manager_address _16
-    SREMPTY	//  addr manager_address _17
-    108 THROWIF
     2DUP	//  addr manager_address addr manager_address
-    SDEQ	//  addr manager_address _20
+    SDEQ	//  addr manager_address _16
     106 THROWIFNOT
   }>
   __test_equal_slices_contract PROC:<{
