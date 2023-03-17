@@ -1,5 +1,5 @@
 
-(slice,slice) __test_parse_sender_addr() {
+slice __test_parse_sender_addr() {
     set_default_initial_data();
     slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
 
@@ -10,7 +10,7 @@
                     .end_cell().begin_parse();
 
     var msg = begin_cell()
-            .store_uint(0x18, 6)
+            .store_uint(0x6, 4)
             .store_slice(manager_address) ;; sender's address
             .store_coins(1)  ;; amount of nanoTons to send
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
@@ -20,13 +20,12 @@
 
     var (int gas_used, stack) = invoke_method(parse_sender_address, [msg]);
     [slice sender_address] = stack;
-    ;;throw_unless(102, equal_slices(sender_address, manager_address));
-    return (sender_address,manager_address);
+    throw_unless(102, equal_slices(sender_address, manager_address));
+    return sender_address;
 }
 
 slice __test_get_manager(){
     set_default_initial_data();
-    slice manager_address = "kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a;
 
     var (int gas_used, stack) = invoke_method(manager, []);
     [slice manager_address] = stack;
@@ -40,6 +39,7 @@ slice __test_get_manager(){
     var (int gas_used, stack) = invoke_method(load_data, []);
     [slice manager_address, cell dict] = stack;
 
+    throw_if(107, dict.begin_parse().slice_data_empty?());
     throw_unless(106, equal_slices(addr,manager_address));
     return (addr, manager_address);
 }
@@ -56,3 +56,13 @@ int __test_equal_slices_contract() {
     throw_unless(102, result);
     return result;
 }
+
+;; EROR CODES:
+
+;; 102 - not a manager tries to change manager address 
+;; 103 - in_msg_body slice has unread bits
+;; 104 - no data found in dict for that key
+;; 105 - no reference cell in msg
+;; 106 - reference cell is empty 
+;; 107 - dict cell has 0 bits
+;; 1001 - not a manger wants to add data
