@@ -47,7 +47,7 @@ slice __test_get_certificate() {
     return hash;
 }
 
-int __test_change_manager() {
+slice __test_change_manager() {
     set_default_initial_data();
 
     slice message_body = begin_cell()
@@ -57,15 +57,16 @@ int __test_change_manager() {
                     .end_cell().begin_parse();
 
     var msg = begin_cell()
-            .store_uint(0x18, 6)
+            .store_uint(0x6, 4)
             .store_slice("kQDmznN8tOKzSQxHTzMTege2QKFcrCwnkTNRtY2cubGB1IKu"a) ;; sender's address
-            .store_coins(1)  ;; amount of ton
+            .store_coins(1)  ;; amount of nanoTons to send
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; execution of serialization primitives ends
             ;;(includes 14 parameters)
             .store_slice(message_body)
             .end_cell();
 
-    var (int gas_used1, _) = invoke_method(recv_internal, [1, msg, message_body]);  ;;
-      return gas_used1; 
+    var (int gas_used1, _) = invoke_method(recv_internal, [1, msg, message_body]);
+    (slice address , cell dict) = load_data();
+      return address; 
 }
 
