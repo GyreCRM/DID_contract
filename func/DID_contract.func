@@ -27,18 +27,18 @@ return sender_address;
     
     (slice manager_address, cell dict) = load_data();
     ;;throw_unless(1001,  equal_slices(manager_address, sender_address));  ;; check if certificate 
-    ;; is issued by the right authority
+    ;; is issued by the right authority (turned off for easier testing)
 
     if (op == 1){  ;; add value to the dictionary
         int key = in_msg_body~load_uint(32);                        ;; load key
         throw_unless(103,in_msg_body.slice_data_empty?());          ;; check that slice is empty
-        throw_if(105,in_msg_body.slice_refs_empty?());              ;; check refs existance
+        throw_if(105,in_msg_body.slice_refs_empty?());              ;; check reference existance
         cell hash_ref_cell = in_msg_body~load_ref();
         slice hash_slice = hash_ref_cell.begin_parse();
-        int hash_slice_size = hash_slice.slice_bits(); 
-        throw_if(106, hash_slice_size == 0);                        ;; check size of ref cell
+        int hash_slice_size = hash_slice.slice_bits();              ;; number of bits in dict slice 
+        throw_if(106, hash_slice_size == 0);                        ;; check that reference cell is not empty
         slice hash = hash_slice~load_bits(hash_slice_size);
-        dict~udict_set(32, key, hash);
+        dict~udict_set(32, key, hash);                              ;; add/set value to the dict
         set_data(begin_cell()  ;; saving the data
                         .store_slice(manager_address)  
                         .store_ref(dict)
@@ -53,6 +53,7 @@ return sender_address;
                         .store_ref(dict)
                         .end_cell()
             );
+            return ();
         }
         else { throw(3);}
     }
@@ -77,6 +78,8 @@ slice manager() method_id {
 
 ;; 102 - not a manager tries to change manager address 
 ;; 103 - in_msg_body slice has unread bits
-;; 104 - no data found in dict
+;; 104 - no data found in dict for that key
 ;; 105 - no reference cell in msg
 ;; 106 - reference cell is empty 
+;; 107 - dict cell has 0 bits
+;; 1001 - not a manger wants to add data
