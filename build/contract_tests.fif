@@ -2041,7 +2041,8 @@ PROGRAM{
     DROP	//  sender_address
   }>
   recv_internal PROC:<{
-    //  msg_value in_msg_full in_msg_body
+    c2 SAVE
+    SAMEALTSAVE	//  msg_value in_msg_full in_msg_body
     1 2 BLKDROP2	//  in_msg_full in_msg_body
     32 LDU	//  in_msg_full op in_msg_body
     64 LDU	//  in_msg_full op _67 _66
@@ -2083,7 +2084,7 @@ PROGRAM{
     }>	//  in_msg_body op sender_address manager_address dict
     s0 s3 XCHG	//  in_msg_body dict sender_address manager_address op
     2 EQINT	//  in_msg_body dict sender_address manager_address _51
-    IF:<{	//  in_msg_body dict sender_address manager_address
+    IFJMP:<{	//  in_msg_body dict sender_address manager_address
       SWAP	//  in_msg_body dict manager_address sender_address
       SDEQ	//  in_msg_body dict _53
       102 THROWIFNOT
@@ -2096,10 +2097,10 @@ PROGRAM{
       STREF	//  _59
       ENDC	//  _60
       c4 POP
-    }>ELSE<{	//  in_msg_body dict sender_address manager_address
-      4 BLKDROP	// 
-      3 THROW
-    }>
+      RETALT
+    }>	//  in_msg_body dict sender_address manager_address
+    4 BLKDROP	// 
+    3 THROW
   }>
   certificate PROC:<{
     //  student_id
@@ -2202,9 +2203,9 @@ PROGRAM{
     ENDC	//  _11
     CTOS	//  message_body
     0 PUSHINT	//  message_body _14=0
-    24 PUSHINT	//  message_body _14=0 _15=24
-    NEWC	//  message_body _14=0 _15=24 _16
-    6 STU	//  message_body _14=0 _18
+    6 PUSHINT	//  message_body _14=0 _15=6
+    NEWC	//  message_body _14=0 _15=6 _16
+    4 STU	//  message_body _14=0 _18
     x{801CD9CE6F969C56692188E9E6626F40F6C8142B958584F2266A36B1B39736303A9_} PUSHSLICE	//  message_body _14=0 _18 _19
     STSLICER	//  message_body _14=0 _20
     1 PUSHINT	//  message_body _14=0 _20 _21=1
@@ -2219,8 +2220,10 @@ PROGRAM{
     1 PUSHINT	//  message_body msg _41 _43=1
     s0 s0 s3 XCHG3	//  _41 _43=1 msg message_body
     TRIPLE	//  _41 _42
-    invoke_method CALLDICT	//  _45 _46
-    DROP	//  gas_used1
+    invoke_method CALLDICT	//  _48 _49
+    2DROP	// 
+    load_data INLINECALLDICT	//  _50 _51
+    DROP	//  address
   }>
   __test_parse_sender_addr PROC:<{
     // 
@@ -2236,9 +2239,9 @@ PROGRAM{
     ENDC	//  manager_address _13
     CTOS	//  manager_address message_body
     0 PUSHINT	//  manager_address message_body _16=0
-    24 PUSHINT	//  manager_address message_body _16=0 _17=24
-    NEWC	//  manager_address message_body _16=0 _17=24 _18
-    6 STU	//  manager_address message_body _16=0 _20
+    6 PUSHINT	//  manager_address message_body _16=0 _17=6
+    NEWC	//  manager_address message_body _16=0 _17=6 _18
+    4 STU	//  manager_address message_body _16=0 _20
     s3 PUSH	//  manager_address message_body _16=0 _20 manager_address
     STSLICER	//  manager_address message_body _16=0 _21
     1 PUSHINT	//  manager_address message_body _16=0 _21 _22=1
@@ -2252,19 +2255,21 @@ PROGRAM{
     }>	//  manager_address msg _42
     SWAP	//  manager_address _42 msg
     SINGLE	//  manager_address _42 _43
-    invoke_method CALLDICT	//  manager_address _47 _48
+    invoke_method CALLDICT	//  manager_address _50 _51
     NIP	//  manager_address stack
     UNSINGLE	//  manager_address sender_address
-    SWAP	//  sender_address manager_address
+    s0 s1 PUXC	//  sender_address sender_address manager_address
+    SDEQ	//  sender_address _48
+    102 THROWIFNOT
   }>
   __test_get_manager PROC:<{
     // 
     set_default_initial_data CALLDICT
     CONT:<{
       manager CALLDICT
-    }>	//  _5
-    0 TUPLE	//  _5 _6
-    invoke_method CALLDICT	//  _10 _11
+    }>	//  _3
+    0 TUPLE	//  _3 _4
+    invoke_method CALLDICT	//  _8 _9
     NIP	//  stack
     UNSINGLE	//  manager_address
   }>
@@ -2276,12 +2281,18 @@ PROGRAM{
       load_data CALLDICT
     }>	//  addr _5
     0 TUPLE	//  addr _5 _6
-    invoke_method CALLDICT	//  addr _14 _15
+    invoke_method CALLDICT	//  addr _22 _23
     NIP	//  addr stack
-    UNPAIR	//  addr _16 _17
-    DROP	//  addr manager_address
+    UNPAIR	//  addr manager_address dict
+    DUP	//  addr manager_address dict dict
+    CTOS	//  addr manager_address dict _12
+    SDEMPTY	//  addr manager_address dict _13
+    107 THROWIF
+    CTOS	//  addr manager_address _16
+    SREMPTY	//  addr manager_address _17
+    108 THROWIF
     2DUP	//  addr manager_address addr manager_address
-    SDEQ	//  addr manager_address _12
+    SDEQ	//  addr manager_address _20
     106 THROWIFNOT
   }>
   __test_equal_slices_contract PROC:<{
