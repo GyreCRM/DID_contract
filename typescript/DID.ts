@@ -2,12 +2,12 @@ import { Contract, ContractProvider, Sender, Address, Cell, Slice, contractAddre
 
 export default class Counter implements Contract {
 
-  async sendCertificate(provider: ContractProvider, via: Sender, hash: Slice, student_id: number) {
+  async sendCertificate(provider: ContractProvider, via: Sender, hash_cell: Cell, student_id: number) {
       const messageBody = beginCell()
           .store_uint(1, 32) // op
           .store_uint(12345, 64)  // query_id
           .store_uint(student_id, 32)       // key (student_id)
-          .store_slice(hash)
+          .store_ref(hash_cell)
           .end_cell();
         await provider.internal(via, {
           value: "0.002", // send 0.002 TON for gas

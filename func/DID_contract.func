@@ -48,6 +48,7 @@ return sender_address;
     else {
         if (op == 2 ){  ;; change manager address 
         throw_unless(102, equal_slices(manager_address, sender_address));  ;; only manager can change address
+        int workchain = in_msg_body~load_int(32);
         set_data(begin_cell()
                         .store_slice(in_msg_body~load_msg_addr())  ;; saving new manager address
                         .store_ref(dict)
